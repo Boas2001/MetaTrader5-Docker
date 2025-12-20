@@ -181,7 +181,49 @@ True
 
 ## Configuration
 
-The port configuration can be adjusted as per the instructions in the KasmVNC repository. Any additional configuration or environment variables needed to customize MetaTrader5 and KasmVNC running settings should be described here.
+The port configuration can be adjusted as per the instructions in the KasmVNC repository.
+
+### MetaTrader 5 Command Line Options
+
+You can pass command line options to MetaTrader 5 using the `MT5_CMD_OPTIONS` environment variable. This is useful for custom configurations, tester modes, or other MetaTrader command line parameters.
+
+Example using docker-compose:
+
+```yaml
+version: '3'
+services:
+  mt5:
+    image: gmag11/metatrader5_vnc
+    container_name: mt5
+    volumes:
+      - mt5_config:/config
+    ports:
+      - 3000:3000
+      - 8001:8001
+    environment:
+      - CUSTOM_USER=<Choose a user>
+      - PASSWORD=<Choose a secure password>
+      - MT5_CMD_OPTIONS=/config:C:\\customized_for_tester_etc.ini
+
+volumes:
+  mt5_config:
+```
+
+Example using docker run:
+
+```bash
+docker run -d -p 3000:3000 -p 8001:8001 \
+  -e MT5_CMD_OPTIONS="/config:C:\\customized_for_tester_etc.ini" \
+  -v mt5_config:/config \
+  gmag11/metatrader5_vnc
+```
+
+Common MetaTrader 5 command line options:
+
+- `/config:<path>` - Use a specific configuration file
+- `/login:<account>` - Automatically login to specified account
+
+For a complete list of available options, refer to the [MetaTrader 5 documentation](https://www.metatrader5.com/en/terminal/help/start_advanced/start).
 
 ## Contributions
 
