@@ -8,7 +8,7 @@ wine_executable="wine"
 metatrader_version="5.0.36"
 mt5server_port="8001"
 MT5_CMD_OPTIONS="${MT5_CMD_OPTIONS:-}"
-mono_url="https://dl.winehq.org/wine/wine-mono/10.3.0/wine-mono-10.3.0-x86.msi"
+mono_url="https://dl.winehq.org/wine/wine-mono/10.4.0/wine-mono-10.4.0-x86.msi"
 #python version to install in Wine
 desired_python_version="${WINE_PYTHON_VERSION:-3.13.8}"
 python_url="https://www.python.org/ftp/python/${desired_python_version}/python-${desired_python_version}-amd64.exe"
@@ -122,7 +122,7 @@ fi
 
 # Install pyxdg library in Linux if not installed
 #
-show_message "[6/7] Checking and installing pyxdg library in Linux if necessary"
+show_message "[7/7] Checking and installing pyxdg library in Linux if necessary"
 #
 if ! is_python_package_installed "pyxdg"; then
     pip install --break-system-packages --no-cache-dir pyxdg
