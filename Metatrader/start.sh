@@ -116,8 +116,8 @@ $wine_executable "$wine_python_exe" -m pip install --upgrade --no-cache-dir pip
 
 # Install MetaTrader5 library in Windows if not installed
 show_message "[6/7] Installing MetaTrader5 library in Windows"
-if ! is_wine_python_package_installed "MetaTrader5==$metatrader_version"; then
-    $wine_executable "$wine_python_exe" -m pip install --no-cache-dir MetaTrader5==$metatrader_version
+if ! is_wine_python_package_installed "MetaTrader5"; then
+    $wine_executable "$wine_python_exe" -m pip install --no-cache-dir MetaTrader5
 fi
 
 # Install pyxdg library in Linux if not installed
