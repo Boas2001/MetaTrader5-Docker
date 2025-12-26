@@ -33,6 +33,7 @@ RUN apt-get update \
 
 COPY /Metatrader /Metatrader
 RUN chmod +x /Metatrader/start.sh
+RUN chmod +x /Metatrader/app_win.sh
 COPY /root /
 
 EXPOSE 3000 8001
