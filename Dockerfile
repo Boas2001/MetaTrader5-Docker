@@ -27,7 +27,7 @@ RUN apt-get update \
     && wget -NP /etc/apt/sources.list.d/ https://dl.winehq.org/wine-builds/debian/dists/bookworm/winehq-bookworm.sources \
     && dpkg --add-architecture i386 \
     && apt-get update \
-    && apt-get install --install-recommends -y winehq-stable \
+    && apt-get install -y winehq-devel \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /etc/apt/keyrings/winehq-archive.key
 
