@@ -23,7 +23,12 @@ PRIVATE_GIT_REF="${PRIVATE_GIT_REF:-main}"
 APP_VENV_DIR="${APP_VENV_DIR:-/config/app-venv-win}"
 
 # --- Checks ---
-command -v git >/dev/null || { echo "[APP-WIN] git not installed"; exit 1; }
+if ! command -v git >/dev/null 2>&1; then
+  echo "[APP-WIN] git not found – installing..."
+  apt-get update
+  apt-get install -y --no-install-recommends git
+  rm -rf /var/lib/apt/lists/*
+fi
 command -v winepath >/dev/null || { echo "[APP-WIN] winepath not installed"; exit 1; }
 
 if [ -z "$PRIVATE_GIT_REPO" ]; then
