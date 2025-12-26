@@ -44,8 +44,10 @@ is_wine_python_package_installed() {
 
 # Function to get the Python version installed in Wine
 get_wine_python_version() {
-    $wine_executable "$wine_python_exe" -c "import sys; print('.'.join(map(str, sys.version_info[:3])))" 2>/dev/null || true
+  "$wine_executable" "$wine_python_exe" -c "import sys; print('.'.join(map(str, sys.version_info[:3])))" 2>/dev/null \
+    | tr -d '\r' | xargs || true
 }
+
 
 
 
@@ -116,6 +118,14 @@ $wine_executable "$wine_python_exe" -m pip install --upgrade --no-cache-dir pip
 show_message "[6/7] Installing MetaTrader5 library in Windows"
 if ! is_wine_python_package_installed "MetaTrader5==$metatrader_version"; then
     $wine_executable "$wine_python_exe" -m pip install --no-cache-dir MetaTrader5==$metatrader_version
+fi
+
+# Install pyxdg library in Linux if not installed
+#
+show_message "[6/7] Checking and installing pyxdg library in Linux if necessary"
+#
+if ! is_python_package_installed "pyxdg"; then
+    pip install --break-system-packages --no-cache-dir pyxdg
 fi
 
 sleep 5
