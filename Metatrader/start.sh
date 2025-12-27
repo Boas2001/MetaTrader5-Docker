@@ -4,7 +4,14 @@
 mt5file='/config/.wine/drive_c/Program Files/MetaTrader 5/terminal64.exe'
 WINEPREFIX='/config/.wine'
 WINEDEBUG='-all'
-wine_executable="wine"
+KRON_WINE_DIR="${KRON_WINE_DIR:-/opt/wine-kron4ek}"
+wine_executable="${WINE_EXE:-$(ls -d ${KRON_WINE_DIR}/wine-* 2>/dev/null | head -n1)/bin/wine}"
+export WINE_EXE="$wine_executable"
+export KRON_WINE_DIR
+
+echo "[WINE] Using: $wine_executable"
+"$wine_executable" --version || true
+
 metatrader_version="5.0.36"
 mt5server_port="8001"
 MT5_CMD_OPTIONS="${MT5_CMD_OPTIONS:-}"
@@ -16,6 +23,17 @@ wine_python_dir="C:\\Python313"
 wine_python_exe="${wine_python_dir}\\python.exe"
 
 mt5setup_url="https://download.mql5.com/cdn/web/metaquotes.software.corp/mt5/mt5setup.exe"
+#sicherstellen dass mono nicht in der gui installiert wird
+export WINEDLLOVERRIDES="mscoree,mshtml="
+export WINEDEBUG="-all"
+
+mkdir -p "$WINEPREFIX"
+# Prefix initialisieren, damit drive_c angelegt wird
+echo "[WINE] Initializing prefix at $WINEPREFIX ..."
+"$wine_executable" wineboot --init || true
+
+# Sicherstellen dass drive_c existiert
+mkdir -p "$WINEPREFIX/drive_c"
 
 # Function to display a graphical message
 show_message() {
@@ -57,6 +75,7 @@ check_dependency "$wine_executable"
 
 # Install Mono if not present
 if [ ! -e "/config/.wine/drive_c/windows/mono" ]; then
+    mkdir -p /config/.wine/drive_c
     show_message "[1/7] Downloading and installing Mono..."
     curl -o /config/.wine/drive_c/mono.msi $mono_url
     WINEDLLOVERRIDES=mscoree=d $wine_executable msiexec /i /config/.wine/drive_c/mono.msi /qn

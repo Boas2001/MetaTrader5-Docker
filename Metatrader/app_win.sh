@@ -4,7 +4,28 @@ set -euo pipefail
 echo "[APP-WIN] Initializing Windows/Wine application..."
 
 # --- expects Wine Python already installed by start.sh ---
-wine_executable="${WINE_EXE:-wine}"
+# Prefer explicit WINE_EXE; otherwise autodetect Kron4ek Wine
+if [ -n "${WINE_EXE:-}" ]; then
+  wine_executable="$WINE_EXE"
+else
+  KRON_WINE_DIR="${KRON_WINE_DIR:-/opt/wine-kron4ek}"
+  kron_wine="$(ls -d ${KRON_WINE_DIR}/wine-* 2>/dev/null | head -n1)/bin/wine"
+  if [ -x "$kron_wine" ]; then
+    wine_executable="$kron_wine"
+  else
+    wine_executable="wine"
+  fi
+fi
+
+echo "[APP-WIN] Using wine: $wine_executable"
+
+# Use winepath from the same Wine distribution (Kron4ek)
+winepath_executable="$(dirname "$wine_executable")/winepath"
+if [ ! -x "$winepath_executable" ]; then
+  echo "[APP-WIN] winepath not found at: $winepath_executable"
+  echo "[APP-WIN] Hint: set WINE_EXE to Kron4ek wine, e.g. /opt/wine-kron4ek/.../bin/wine"
+  exit 1
+fi
 
 # This must match what you set in start.sh
 wine_python_dir="${WINE_PY_DIR:-C:\\Python313}"
@@ -29,7 +50,6 @@ if ! command -v git >/dev/null 2>&1; then
   apt-get install -y --no-install-recommends git
   rm -rf /var/lib/apt/lists/*
 fi
-command -v winepath >/dev/null || { echo "[APP-WIN] winepath not installed"; exit 1; }
 
 if [ -z "$PRIVATE_GIT_REPO" ]; then
   echo "[APP-WIN] PRIVATE_GIT_REPO not set"
@@ -55,14 +75,14 @@ else
 fi
 
 # --- Prepare Windows paths ---
-APP_DIR_WIN="$(winepath -w "$APP_DIR")"
-APP_VENV_DIR_WIN="$(winepath -w "$APP_VENV_DIR")"
+APP_DIR_WIN="$("$winepath_executable" -w "$APP_DIR")"
+APP_VENV_DIR_WIN="$("$winepath_executable" -w "$APP_VENV_DIR")"
 
 REQ_TXT_LINUX="${APP_DIR}/requirements.txt"
-REQ_TXT_WIN="$(winepath -w "$REQ_TXT_LINUX")"
+REQ_TXT_WIN="$("$winepath_executable" -w "$REQ_TXT_LINUX")"
 
 ENTRY_LINUX="${APP_DIR}/${APP_ENTRY}"
-ENTRY_WIN="$(winepath -w "$ENTRY_LINUX")"
+ENTRY_WIN="$("$winepath_executable" -w "$ENTRY_LINUX")"
 
 # venv python.exe path in Windows
 VENV_PY_WIN="${APP_VENV_DIR_WIN}\\Scripts\\python.exe"
@@ -143,6 +163,12 @@ if [ ! -f "$ENTRY_LINUX" ]; then
   exit 1
 fi
 
-echo "[APP-WIN] Starting app with Wine venv Python..."
-"$wine_executable" "$VENV_PY_WIN" "$ENTRY_WIN" &
+echo "[APP-WIN] Starting app with Wine venv Python via cmd.exe..."
+
+CMD_EXE="C:\\Windows\\System32\\cmd.exe"
+APP_DIR_WIN="$("$winepath_executable" -w "$APP_DIR")"
+
+"$wine_executable" "$CMD_EXE" /c "cd /d \"$APP_DIR_WIN\" && \"$VENV_PY_WIN\" \"$ENTRY_WIN\"" &
+
 echo "[APP-WIN] App started."
+
