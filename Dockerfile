@@ -17,7 +17,7 @@ ENV KRON_WINE_ASSET=wine-10.2-staging-tkg-amd64-wow64.tar.xz
 # Install packages + download/extract Kron4ek wine
 RUN dpkg --add-architecture i386 \
  && apt-get update \
- && apt-get install -y --no-install-recommends libc6:i386 libstdc++6:i386 zlib1g:i386 \
+ && apt-get install -y --no-install-recommends libc6:i386 libc6-i386 libstdc++6:i386 zlib1g:i386 \
  && rm -rf /var/lib/apt/lists/*
 
 RUN apt-get update \

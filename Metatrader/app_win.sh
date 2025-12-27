@@ -166,9 +166,24 @@ fi
 echo "[APP-WIN] Starting app with Wine venv Python via cmd.exe..."
 
 CMD_EXE="C:\\Windows\\System32\\cmd.exe"
-APP_DIR_WIN="$("$winepath_executable" -w "$APP_DIR")"
 
-"$wine_executable" "$CMD_EXE" /c "cd /d \"$APP_DIR_WIN\" && \"$VENV_PY_WIN\" \"$ENTRY_WIN\"" &
+echo "[APP-WIN] Starting app with Wine venv Python via cmd.exe..."
+echo "[APP-WIN] CMD: pushd \"$APP_DIR_WIN\" && \"$VENV_PY_WIN\" \"$ENTRY_WIN\""
+#debug:
 
+APP_DIR_WIN="$("$winepath_executable" -w "$APP_DIR" | tr -d '\r' | xargs)"
+ENTRY_WIN="$("$winepath_executable" -w "$ENTRY_LINUX" | tr -d '\r' | xargs)"
+APP_VENV_DIR_WIN="$("$winepath_executable" -w "$APP_VENV_DIR" | tr -d '\r' | xargs)"
+VENV_PY_WIN="${APP_VENV_DIR_WIN}\\Scripts\\python.exe"
+
+echo "[APP-WIN] APP_DIR_LINUX=[$APP_DIR]"
+echo "[APP-WIN] APP_DIR_WIN=[$APP_DIR_WIN]"
+echo "[APP-WIN] ENTRY_WIN=[$ENTRY_WIN]"
+echo "[APP-WIN] VENV_PY_WIN=[$VENV_PY_WIN]"
+
+
+
+"$wine_executable" "$CMD_EXE" /c "pushd \"$APP_DIR_WIN\" && \"$VENV_PY_WIN\" \"$ENTRY_WIN\"" &
 echo "[APP-WIN] App started."
+
 
