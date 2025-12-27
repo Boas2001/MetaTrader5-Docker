@@ -137,6 +137,34 @@ if [ ! -f "$APP_ENV_FILE" ]; then
   echo ""
   exit 1
 fi
+# --- Debug tests ---
+CMD_EXE="C:\\Windows\\System32\\cmd.exe"
+
+echo "[APP-WIN] Starting app with Wine venv Python via cmd.exe..."
+echo "[APP-WIN] CMD: pushd \"$APP_DIR_WIN\" && \"$VENV_PY_WIN\" \"$ENTRY_WIN\""
+
+echo "================ CMD / WINE DEBUG TESTS ================"
+
+echo "[RUNTEST 1] cmd.exe basic execution"
+"$wine_executable" "$CMD_EXE" /c "echo CMD_OK" || echo "[RUNTEST 1] FAILED"
+
+echo "[RUNTEST 2] where cmd"
+"$wine_executable" "$CMD_EXE" /c "where cmd" || echo "[RUNTEST 2] FAILED"
+
+echo "[RUNTEST 3] Z: drive mapping"
+"$wine_executable" "$CMD_EXE" /c "dir Z:\\" || echo "[RUNTEST 3] FAILED"
+
+echo "[RUNTEST 4] Z:\\config visibility"
+"$wine_executable" "$CMD_EXE" /c "dir Z:\\config" || echo "[RUNTEST 4] FAILED"
+
+echo "[RUNTEST 5] Windows Python version"
+"$wine_executable" "$CMD_EXE" /c "\"C:\\Python313\\python.exe\" --version" || echo "[RUNTEST 5] FAILED"
+
+echo "[RUNTEST 6] Windows venv Python version"
+"$wine_executable" "$CMD_EXE" /c "\"$VENV_PY_WIN\" --version" || echo "[RUNTEST 6] FAILED"
+
+echo "[RUNTEST 7] pushd into app directory"
+"$wine_executable" "$CMD_EXE" /c "pushd \"$APP_DIR_WIN\" && echo PUSHD_OK" || echo "[RUNTEST 7] FAILED"
 
 # If .env exists, require explicit confirmation flag
 if ! grep -Eq "^[[:space:]]*${ENV_READY_KEY}[[:space:]]*=[[:space:]]*${ENV_READY_VALUE}[[:space:]]*$" "$APP_ENV_FILE"; then
@@ -163,36 +191,11 @@ if [ ! -f "$ENTRY_LINUX" ]; then
   exit 1
 fi
 
-echo "[APP-WIN] Starting app with Wine venv Python via cmd.exe..."
 
 CMD_EXE="C:\\Windows\\System32\\cmd.exe"
 
 echo "[APP-WIN] Starting app with Wine venv Python via cmd.exe..."
 echo "[APP-WIN] CMD: pushd \"$APP_DIR_WIN\" && \"$VENV_PY_WIN\" \"$ENTRY_WIN\""
-#debug:
-echo "[TEST] 1) Test cmd.exe basic execution"
-echo "[TEST-CMD] $wine_executable \"C:\\Windows\\System32\\cmd.exe\" /c \"echo CMD_OK\""
-
-echo "[TEST] 2) Test where cmd"
-echo "[TEST-CMD] $wine_executable \"C:\\Windows\\System32\\cmd.exe\" /c \"where cmd\""
-
-echo "[TEST] 3) Test Z: drive mapping"
-echo "[TEST-CMD] $wine_executable \"C:\\Windows\\System32\\cmd.exe\" /c \"dir Z:\\\""
-
-echo "[TEST] 4) Test Z:\\config visibility"
-echo "[TEST-CMD] $wine_executable \"C:\\Windows\\System32\\cmd.exe\" /c \"dir Z:\\config\""
-
-echo "[TEST] 5) Test Windows Python version"
-echo "[TEST-CMD] $wine_executable \"C:\\Windows\\System32\\cmd.exe\" /c \"\\\"C:\\Python313\\python.exe\\\" --version\""
-
-echo "[TEST] 6) Test Windows venv Python version"
-echo "[TEST-CMD] $wine_executable \"C:\\Windows\\System32\\cmd.exe\" /c \"\\\"$VENV_PY_WIN\\\" --version\""
-
-echo "[TEST] 7) Test pushd into app directory"
-echo "[TEST-CMD] $wine_executable \"C:\\Windows\\System32\\cmd.exe\" /c \"pushd \\\"$APP_DIR_WIN\\\" && echo PUSHD_OK\""
-
-echo "[TEST] 8) Test running entry script (dry run, no start)"
-echo "[TEST-CMD] $wine_executable \"C:\\Windows\\System32\\cmd.exe\" /c \"pushd \\\"$APP_DIR_WIN\\\" && \\\"$VENV_PY_WIN\\\" \\\"$ENTRY_WIN\\\" --help\""
 
 "$wine_executable" "$CMD_EXE" /c "pushd \"$APP_DIR_WIN\" && \"$VENV_PY_WIN\" \"$ENTRY_WIN\"" &
 echo "[APP-WIN] App started."
