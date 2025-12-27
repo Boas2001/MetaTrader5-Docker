@@ -170,18 +170,29 @@ CMD_EXE="C:\\Windows\\System32\\cmd.exe"
 echo "[APP-WIN] Starting app with Wine venv Python via cmd.exe..."
 echo "[APP-WIN] CMD: pushd \"$APP_DIR_WIN\" && \"$VENV_PY_WIN\" \"$ENTRY_WIN\""
 #debug:
+echo "[TEST] 1) Test cmd.exe basic execution"
+echo "[TEST-CMD] $wine_executable \"C:\\Windows\\System32\\cmd.exe\" /c \"echo CMD_OK\""
 
-APP_DIR_WIN="$("$winepath_executable" -w "$APP_DIR" | tr -d '\r' | xargs)"
-ENTRY_WIN="$("$winepath_executable" -w "$ENTRY_LINUX" | tr -d '\r' | xargs)"
-APP_VENV_DIR_WIN="$("$winepath_executable" -w "$APP_VENV_DIR" | tr -d '\r' | xargs)"
-VENV_PY_WIN="${APP_VENV_DIR_WIN}\\Scripts\\python.exe"
+echo "[TEST] 2) Test where cmd"
+echo "[TEST-CMD] $wine_executable \"C:\\Windows\\System32\\cmd.exe\" /c \"where cmd\""
 
-echo "[APP-WIN] APP_DIR_LINUX=[$APP_DIR]"
-echo "[APP-WIN] APP_DIR_WIN=[$APP_DIR_WIN]"
-echo "[APP-WIN] ENTRY_WIN=[$ENTRY_WIN]"
-echo "[APP-WIN] VENV_PY_WIN=[$VENV_PY_WIN]"
+echo "[TEST] 3) Test Z: drive mapping"
+echo "[TEST-CMD] $wine_executable \"C:\\Windows\\System32\\cmd.exe\" /c \"dir Z:\\\""
 
+echo "[TEST] 4) Test Z:\\config visibility"
+echo "[TEST-CMD] $wine_executable \"C:\\Windows\\System32\\cmd.exe\" /c \"dir Z:\\config\""
 
+echo "[TEST] 5) Test Windows Python version"
+echo "[TEST-CMD] $wine_executable \"C:\\Windows\\System32\\cmd.exe\" /c \"\\\"C:\\Python313\\python.exe\\\" --version\""
+
+echo "[TEST] 6) Test Windows venv Python version"
+echo "[TEST-CMD] $wine_executable \"C:\\Windows\\System32\\cmd.exe\" /c \"\\\"$VENV_PY_WIN\\\" --version\""
+
+echo "[TEST] 7) Test pushd into app directory"
+echo "[TEST-CMD] $wine_executable \"C:\\Windows\\System32\\cmd.exe\" /c \"pushd \\\"$APP_DIR_WIN\\\" && echo PUSHD_OK\""
+
+echo "[TEST] 8) Test running entry script (dry run, no start)"
+echo "[TEST-CMD] $wine_executable \"C:\\Windows\\System32\\cmd.exe\" /c \"pushd \\\"$APP_DIR_WIN\\\" && \\\"$VENV_PY_WIN\\\" \\\"$ENTRY_WIN\\\" --help\""
 
 "$wine_executable" "$CMD_EXE" /c "pushd \"$APP_DIR_WIN\" && \"$VENV_PY_WIN\" \"$ENTRY_WIN\"" &
 echo "[APP-WIN] App started."
