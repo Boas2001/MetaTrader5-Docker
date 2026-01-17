@@ -5,7 +5,7 @@ mt5file='/config/.wine/drive_c/Program Files/MetaTrader 5/terminal64.exe'
 WINEPREFIX='/config/.wine'
 WINEDEBUG='-all'
 wine_executable="wine"
-metatrader_version="5.0.36"
+metatrader_version="5.0.45"
 mt5server_port="8001"
 MT5_CMD_OPTIONS="${MT5_CMD_OPTIONS:-}"
 mono_url="https://dl.winehq.org/wine/wine-mono/10.3.0/wine-mono-10.3.0-x86.msi"
@@ -75,6 +75,7 @@ install_custom_requirements() {
         show_message "[7/8] ERROR: Custom requirements installation failed!"
         exit 1
     fi
+}
 
 # Install Mono if not present
 if [ ! -e "/config/.wine/drive_c/windows/mono" ]; then
