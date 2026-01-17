@@ -9,7 +9,7 @@ metatrader_version="5.0.36"
 mt5server_port="8001"
 MT5_CMD_OPTIONS="${MT5_CMD_OPTIONS:-}"
 mono_url="https://dl.winehq.org/wine/wine-mono/10.3.0/wine-mono-10.3.0-x86.msi"
-python_url="https://www.python.org/ftp/python/3.13.8/python-3.13.8.exe"
+python_url="https://www.python.org/ftp/python/3.13.8/python-3.13.8-amd64.exe"
 mt5setup_url="https://download.mql5.com/cdn/web/metaquotes.software.corp/mt5/mt5setup.exe"
 
 # NEU: Projekt-Volume Konfiguration
