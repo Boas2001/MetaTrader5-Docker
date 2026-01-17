@@ -5,6 +5,7 @@ services:
     container_name: mt5
     volumes:
       - ./config:/config
+      _ ../TelegramSignalCopier:/app
     ports:
       - 3000:3000
     env_file:
