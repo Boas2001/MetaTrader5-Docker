@@ -12,6 +12,11 @@ mono_url="https://dl.winehq.org/wine/wine-mono/10.3.0/wine-mono-10.3.0-x86.msi"
 python_url="https://www.python.org/ftp/python/3.13.8/python-3.13.8.exe"
 mt5setup_url="https://download.mql5.com/cdn/web/metaquotes.software.corp/mt5/mt5setup.exe"
 
+# NEU: Projekt-Volume Konfiguration
+PROJECT_DIR="/app"
+REQUIREMENTS_FILE="$PROJECT_DIR/requirements.txt"
+REQUIREMENTS_INSTALLED_MARKER="$WINEPREFIX/.custom_requirements_installed"
+
 # Function to display a graphical message
 show_message() {
     echo $1
@@ -40,6 +45,36 @@ is_wine_python_package_installed() {
 # Check for necessary dependencies
 check_dependency "curl"
 check_dependency "$wine_executable"
+
+# Funktion für Custom Requirements Installation
+install_custom_requirements() {
+    if [ ! -f "$REQUIREMENTS_FILE" ]; then
+        show_message "[7/8] No requirements.txt found in $PROJECT_DIR - skipping custom packages"
+        return 0
+    fi
+
+    if [ -f "$REQUIREMENTS_INSTALLED_MARKER" ]; then
+        show_message "[7/8] Custom requirements already installed (use ENV SKIP_REQUIREMENTS=no to force reinstall)"
+        return 0
+    fi
+
+    show_message "[7/8] Installing custom requirements from $REQUIREMENTS_FILE..."
+    
+    # Upgrade pip first
+    $wine_executable python -m pip install --upgrade --no-cache-dir pip
+    
+    # Install requirements from mounted volume
+    $wine_executable python -m pip install --no-cache-dir -r "$REQUIREMENTS_FILE"
+    
+    if [ $? -eq 0 ]; then
+        touch "$REQUIREMENTS_INSTALLED_MARKER"
+        show_message "[7/8] Custom requirements installed successfully!"
+        # List installed packages for verification
+        $wine_executable python -m pip list | head -10
+    else
+        show_message "[7/8] ERROR: Custom requirements installation failed!"
+        exit 1
+    fi
 
 # Install Mono if not present
 if [ ! -e "/config/.wine/drive_c/windows/mono" ]; then
@@ -92,8 +127,12 @@ fi
 show_message "[6/7] Installing Python libraries"
 $wine_executable python -m pip install --upgrade --no-cache-dir pip
 
-# Install MetaTrader5 library in Windows if not installed
-show_message "[6/7] Installing MetaTrader5 library in Windows"
-if ! is_wine_python_package_installed "MetaTrader5==$metatrader_version"; then
-    $wine_executable python -m pip install --no-cache-dir MetaTrader5==$metatrader_version
+# ─────────────────────────────────────────────────────────────
+# 7. NEU: Install custom requirements from /app volume
+# ─────────────────────────────────────────────────────────────
+# Skip if SKIP_REQUIREMENTS=1 environment variable is set
+if [ "${SKIP_REQUIREMENTS:-0}" != "1" ]; then
+    install_custom_requirements
+else
+    show_message "[7/8] Custom requirements skipped (SKIP_REQUIREMENTS=1)"
 fi
