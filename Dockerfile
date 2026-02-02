@@ -10,6 +10,12 @@ ENV TITLE=Metatrader5
 ENV WINEPREFIX="/config/.wine"
 ENV WINEDEBUG=-all
 
+# Install python3-xdg for proper config dir handling
+RUN apt-get update && \
+    apt-get install -y python3-xdg && \
+    rm -rf /var/lib/apt/lists/*
+
+
 # Install all packages in a single layer to reduce image size
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \

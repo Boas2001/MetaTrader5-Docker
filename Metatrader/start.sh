@@ -1,7 +1,16 @@
 #!/bin/bash
 
 # Configuration variables
-mt5file='/config/.wine/drive_c/Program Files/MetaTrader 5/terminal64.exe'
+# NEU: Instanz-Nummer (1,2,3,...) -> installiert nach "C:\Program Files\MetaTrader 5_<n>"
+MT5_INSTANCE="${MT5_INSTANCE:-1}"
+
+MT5_DEFAULT_DIR="/config/.wine/drive_c/Program Files/MetaTrader 5"
+MT5_DEFAULT_EXE="${MT5_DEFAULT_DIR}/terminal64.exe"
+
+# NEU: Instanz-spezifischer Installationspfad
+MT5_INSTALL_DIR="/config/.wine/drive_c/Program Files/MetaTrader 5_${MT5_INSTANCE}"
+mt5file="${MT5_INSTALL_DIR}/terminal64.exe"
+
 WINEPREFIX='/config/.wine'
 WINEDEBUG='-all'
 wine_executable="wine"
@@ -16,6 +25,9 @@ mt5setup_url="https://download.mql5.com/cdn/web/metaquotes.software.corp/mt5/mt5
 PROJECT_DIR="/app"
 REQUIREMENTS_FILE="$PROJECT_DIR/requirements.txt"
 REQUIREMENTS_INSTALLED_MARKER="$WINEPREFIX/.custom_requirements_installed"
+
+# NEU: Installer Cache-Pfad (nur 1x Download)
+MT5_SETUP_LOCAL="/config/.wine/drive_c/mt5setup.exe"
 
 # Function to display a graphical message
 show_message() {
@@ -88,11 +100,11 @@ else
     show_message "[1/7] Mono is already installed."
 fi
 
-# Check if MetaTrader 5 is already installed
-if [ -e "$mt5file" ]; then
-    show_message "[2/7] File $mt5file already exists."
+# Check if MetaTrader 5 is already installed (Default install)
+if [ -e "$MT5_DEFAULT_EXE" ]; then
+    show_message "[2/7] File $MT5_DEFAULT_EXE already exists."
 else
-    show_message "[2/7] File $mt5file is not installed. Installing..."
+    show_message "[2/7] File $MT5_DEFAULT_EXE is not installed. Installing..."
 
     # Set Windows 10 mode in Wine and download and install MT5
     $wine_executable reg add "HKEY_CURRENT_USER\\Software\\Wine" /v Version /t REG_SZ /d "win10" /f
@@ -104,12 +116,41 @@ else
     rm -f /config/.wine/drive_c/mt5setup.exe
 fi
 
-# Recheck if MetaTrader 5 is installed
-if [ -e "$mt5file" ]; then
-    show_message "[4/7] File $mt5file is installed. Running MT5..."
-    $wine_executable "$mt5file" $MT5_CMD_OPTIONS &
+# NEU: Copy default install to instance folders (MetaTrader 5_1, _2, ...)
+if [ "${AUTOSTART_ALL_MT5_INSTANCES:-0}" = "1" ]; then
+    MT5_INSTANCES="${MT5_INSTANCES:-1}"
+
+    for i in $(seq 1 "$MT5_INSTANCES"); do
+        TARGET_DIR="/config/.wine/drive_c/Program Files/MetaTrader 5_${i}"
+        TARGET_EXE="${TARGET_DIR}/terminal64.exe"
+
+        if [ -e "$TARGET_EXE" ]; then
+            show_message "[2/7] File $TARGET_EXE already exists."
+        else
+            show_message "[2/7] Creating MT5 instance $i by copying default installation..."
+
+            # Zielordner neu erstellen
+            rm -rf "$TARGET_DIR"
+            cp -a "$MT5_DEFAULT_DIR" "$TARGET_DIR"
+
+            # Optional: Icon-Datei pro Instanz ablegen (falls gemountet vorhanden)
+            # Lege z.B. unter /app/icons/mt5_1.ico, mt5_2.ico, ... ab
+            ICON_SRC="/app/icons/mt5_${i}.ico"
+            if [ -f "$ICON_SRC" ]; then
+                cp -a "$ICON_SRC" "${TARGET_DIR}/instance.ico"
+                show_message "[2/7] Copied icon for instance $i to ${TARGET_DIR}/instance.ico"
+            fi
+        fi
+    done
 else
-    show_message "[4/7] File $mt5file is not installed. MT5 cannot be run."
+    # Single instance mode: map mt5file to instance folder by copying once if missing
+    if [ -e "$mt5file" ]; then
+        show_message "[2/7] File $mt5file already exists."
+    else
+        show_message "[2/7] Creating MT5 instance $MT5_INSTANCE by copying default installation..."
+        rm -rf "$MT5_INSTALL_DIR"
+        cp -a "$MT5_DEFAULT_DIR" "$MT5_INSTALL_DIR"
+    fi
 fi
 
 

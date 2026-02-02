@@ -1,11 +1,16 @@
 services:
   mt5:
-    build: .
-    image: gmag11/metatrader5_vnc
-    container_name: mt5
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        VERSION: 1.2.0
+        BUILD_DATE: ${BUILD_DATE}
+
+    container_name: mt5_1
     volumes:
       - ./config:/config
-      _ ../TelegramSignalCopier:/app
+      - ../TelegramSignalCopier:/app
     ports:
       - 3000:3000
     env_file:
